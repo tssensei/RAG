@@ -5,7 +5,7 @@ Converts MS MARCO documents into embeddings using BGE encoder
 import json
 from FlagEmbedding import FlagModel
 from tqdm import tqdm
-import os
+
 
 def load_documents(file_path):
     print(f"Loading documents from {file_path}...")
@@ -39,15 +39,17 @@ def save_preprocessed_data(data, output_path):
         json.dump(data, f, indent=2)
 
 def main():
-    INPUT_FILE = 'data/documents.json'
-    OUTPUT_FILE = 'preprocessed_documents.json'
+    # INPUT_FILE = 'data_chunked/documents.json'
+    INPUT_FILE = 'data_chunked/queries.json'
+    # OUTPUT_FILE = 'chunked_output/preprocessed_documents.json'
+    OUTPUT_FILE = 'chunked_output/preprocessed_queries.json'
     MODEL_NAME = 'BAAI/bge-base-en-v1.5'
     BATCH_SIZE = 32
 
     documents = load_documents(INPUT_FILE)
 
     print(f"\nInitializing BGE encoder model: {MODEL_NAME}")
-    model = FlagModel(MODEL_NAME, use_fp16=False) # use_fp16=False for CPU compatibility
+    model = FlagModel(MODEL_NAME, use_fp16=False) 
     print("Model loaded successfully")
 
     print("\nStarting encoding process...")

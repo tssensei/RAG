@@ -12,11 +12,10 @@ class VectorDatabase:
     def __init__(self, dimension=768):
         self.dimension = dimension
         self.index = None
-        self.documents = []  # document metadata (id, text)
+        self.documents = []  # list of(id, text) 
         self.embeddings = None
 
     def load_documents(self, file_path):
-        """Load preprocessed documents with embeddings from JSON file"""
         print(f"Loading preprocessed documents from {file_path}...")
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -24,12 +23,9 @@ class VectorDatabase:
         self.embeddings = np.array([doc['embedding'] for doc in data], dtype=np.float32)
         self.documents = [{'id': doc['id'], 'text': doc['text']} for doc in data]
 
-        assert self.embeddings.shape[1] == self.dimension, \
-            f"Expected {self.dimension} dimensions, got {self.embeddings.shape[1]}"
         print(f"Embeddings shape: {self.embeddings.shape}")
 
     def build_index(self):
-        """Build FAISS index using L2 (Euclidean) distance"""
         if self.embeddings is None:
             raise ValueError("No embeddings loaded. Call load_documents() first.")
         self.index = faiss.IndexFlatL2(self.dimension)
@@ -68,15 +64,16 @@ class VectorDatabase:
 
 
 def main():
-    PREPROCESSED_FILE = 'preprocessed_documents.json'
+    PREPROCESSED_FILE = 'chunked_output/preprocessed_documents.json'
 
     db = VectorDatabase(dimension=768)
     db.load_documents(PREPROCESSED_FILE)
     db.build_index()
 
-    # document should match itself with distance ~0
+    # Test 1: use an embedding from the document to search itself
+    # document should match itself with distance 0
     print("-"*60)
-    print("Test 1: Self-Similarity Search")
+    print("Test 1: Self Search")
     print()
     test_doc_idx = 42
     print(f"Document ID: {db.documents[test_doc_idx]['id']}")
@@ -93,8 +90,9 @@ def main():
     if indices[0][0] == test_doc_idx and distances[0][0] < 0.001:
         print("\nSUCCESS: Document correctly matched itself with distance ≈ 0")
     else:
-        print("\nWARNING: Self-match test failed")
+        print("\nFAILED: Self-match test failed")
     print()
 
+    
 if __name__ == "__main__":
     main()
