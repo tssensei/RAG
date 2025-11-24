@@ -7,6 +7,7 @@ import json
 import numpy as np
 import faiss
 from typing import Tuple, List, Dict
+from encode import QueryEncoder
 
 class VectorDatabase:
     def __init__(self, dimension=768):
@@ -72,27 +73,37 @@ def main():
 
     # Test 1: use an embedding from the document to search itself
     # document should match itself with distance 0
-    print("-"*60)
-    print("Test 1: Self Search")
-    print()
-    test_doc_idx = 42
-    print(f"Document ID: {db.documents[test_doc_idx]['id']}")
-    print(f"Document text: {db.documents[test_doc_idx]['text'][:100]}...")
+    # print("-"*60)
+    # print("Test 1: Self Search")
+    # print()
+    # test_doc_idx = 42
+    # print(f"Document ID: {db.documents[test_doc_idx]['id']}")
+    # print(f"Document text: {db.documents[test_doc_idx]['text'][:100]}...")
 
-    # Use its own embedding as query
-    query_embedding = db.embeddings[test_doc_idx]
+    # # Use its own embedding as query
+    # query_embedding = db.embeddings[test_doc_idx]
+    # distances, indices = db.search(query_embedding, k=5)
+
+    # print(f"\nTop 5 search results:")
+    # print(f"Distances: {distances[0]}")
+    # print(f"Indices:   {indices[0]}")
+
+    # if indices[0][0] == test_doc_idx and distances[0][0] < 0.001:
+    #     print("\nSUCCESS: Document correctly matched itself with distance ≈ 0")
+    # else:
+    #     print("\nFAILED: Self-match test failed")
+    # print()
+
+    # Component 2: Vector Search
+    encoder = QueryEncoder()
+    query = "What is Cornell's add/drop policy?"
+    query_embedding = encoder.encode(query)
     distances, indices = db.search(query_embedding, k=5)
-
     print(f"\nTop 5 search results:")
     print(f"Distances: {distances[0]}")
     print(f"Indices:   {indices[0]}")
+    # print(f"Best Match Document Content: {db.documents[indices[0][0]]['text']}")
 
-    if indices[0][0] == test_doc_idx and distances[0][0] < 0.001:
-        print("\nSUCCESS: Document correctly matched itself with distance ≈ 0")
-    else:
-        print("\nFAILED: Self-match test failed")
-    print()
 
-    
 if __name__ == "__main__":
     main()
